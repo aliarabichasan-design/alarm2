@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مذكّر المهام</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root{
+    --bg: #F2F4F8;
+    --bg-soft: #FFFFFF;
+    --card: #FFFFFF;
+    --line: #E3E7EF;
+    --ink: #15213C;
+    --ink-dim: #6B7280;
+    --amber: #C9A227;
+    --amber-dim: #FBF3DC;
+    --teal: #2F8558;
+    --danger: #C0392B;
+    --navy: #131E37;
+    --gold: #C9A227;
+    --gold-soft: #FBF3DC;
+    --green-bg: #E8F6EC;
+    --pill-bg: #EEF1F6;
+    --danger-bg: #FBEAE7;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Tajawal', sans-serif;
+    min-height: 100vh;
+  }
+
+  #app{
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 22px 16px 100px;
+    position: relative;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .pulse-dot{
+    width:12px; height:12px;
+    border-radius:50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 0 rgba(62,138,120,0.6);
+    animation: pulse 2.4s infinite;
+  }
+  .pulse-dot.off{ background: var(--ink-dim); animation:none; box-shadow:none; }
+
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(62,138,120,0.55); }
+    70%{ box-shadow: 0 0 0 10px rgba(62,138,120,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(62,138,120,0); }
+  }
+
+  h1{
+    font-size: 33px;
+    font-weight: 900;
+    margin:0;
+    letter-spacing: 0.2px;
+  }
+
+  .status-pill{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink-dim);
+    border:1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor:pointer;
+    background: var(--bg-soft);
+  }
+  .status-pill.granted{ color: var(--teal); border-color: var(--teal); }
+  .status-pill.denied{ color: var(--danger); border-color: var(--danger); }
+
+  form{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .row{ display:flex; gap:10px; margin-bottom: 10px; }
+  .row:last-child{ margin-bottom:0; }
+
+  input[type=text], textarea{
+    flex:1;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-family:'Tajawal', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  input[type=text]:focus, textarea:focus{ outline: 2px solid var(--amber); outline-offset:1px; }
+
+  select{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--ink);
+    font-family:'Tajawal', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .time-row{ align-items:center; }
+  .time-row label{ font-size: 18px; font-weight: 700; color: var(--ink); white-space:nowrap; }
+  .time-row select{ flex:1; text-align:center; }
+
+  button.add-btn{
+    width:100%;
+    margin-top: 12px;
+    background: var(--amber);
+    color: #1A1305;
+    border:none;
+    border-radius: 10px;
+    padding: 15px;
+    font-family:'Tajawal', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    cursor:pointer;
+  }
+  button.add-btn:active{ transform: scale(0.98); }
+
+  .section-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink-dim);
+    letter-spacing: 1px;
+    margin: 0 4px 12px;
+  }
+
+  .photo-row{ align-items:center; margin-bottom: 14px; }
+  .photo-picker{
+    width: 80px; height:80px;
+    border-radius: 18px;
+    background: var(--bg);
+    border: 2px dashed var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 30px;
+    color: var(--ink-dim);
+    cursor:pointer;
+    flex-shrink:0;
+    overflow:hidden;
+    position:relative;
+  }
+  .photo-picker img{ width:100%; height:100%; object-fit:cover; }
+  .photo-picker input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .photo-picker-label{ font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .photo-clear{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--danger);
+    cursor:pointer;
+    background:none; border:none;
+    font-family:'Tajawal', sans-serif;
+    padding: 0;
+  }
+
+  /* ---------- بطاقات المهام بتصميم التذاكر ---------- */
+  .tasks-container{ display:flex; flex-direction:column; gap:16px; }
+  .ct-row{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .ct-row.due{ border-color: var(--danger); background: linear-gradient(135deg, #FBEAE7, var(--bg-soft)); }
+
+  .ticket-head{ display:flex; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .ticket-flight-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background: var(--pill-bg); border: 1px solid var(--line);
+    border-radius: 30px; padding: 4px 12px; font-weight: 800; font-size: 14px; color: var(--ink);
+  }
+  .ticket-status{ display:inline-flex; align-items:center; gap:4px; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
+  .ticket-status.ok{ background: var(--green-bg); color: var(--teal); }
+  .ticket-status.due{ background: var(--danger-bg); color: var(--danger); }
+
+  .ticket-main{ display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .ticket-title{ font-size: 20px; font-weight: 900; color: var(--ink); line-height:1.3; }
+  .ticket-time-circle{
+    width: 56px; height:56px; flex-shrink:0; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--pill-bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-weight: 800; font-size: 13px; color: var(--ink);
+  }
+
+  .ticket-date-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    border: 1px solid var(--gold); background: var(--gold-soft); color: var(--ink);
+    border-radius: 20px; padding: 4px 12px; font-family:'IBM Plex Mono', monospace;
+    font-weight: 800; font-size: 13px; margin-bottom: 10px;
+  }
+
+  .ticket-info-pill{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--pill-bg); border-radius: 10px; padding: 8px 12px;
+    font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 8px;
+  }
+
+  .ticket-footer{
+    display:flex; align-items:center; justify-content: space-between;
+    margin: 10px 0 12px; padding-top: 10px; border-top: 1px dashed var(--line);
+  }
+  .task-contact{
+    font-size: 15px; font-weight: 700; color: var(--teal);
+    text-decoration:none; display:inline-flex; align-items:center; gap:4px;
+  }
+
+  .calendar-btn{
+    width:100%; background: var(--navy); border: 1px solid var(--gold);
+    color: var(--gold); border-radius: 10px; padding: 12px;
+    font-family:'Tajawal', sans-serif; font-weight: 800; font-size: 15px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .calendar-btn:active{ transform: scale(0.98); }
+
+  .ct-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    background: var(--bg); border: 1px solid var(--line); color: var(--ink-dim);
+    border-radius: 8px; width: 34px; height:34px; font-size: 15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn.done{ color: var(--teal); border-color: var(--teal); }
+  .icon-btn.del{ color: var(--danger); }
+
+  .copy-btn{ background:none; border:none; color: var(--ink-dim); font-size: 15px; cursor:pointer; }
+
+  #toast{
+    position: fixed; bottom: 24px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--teal); color: var(--ink);
+    padding: 10px 20px; border-radius: 30px; font-size: 16px; font-weight: 700;
+    opacity:0; pointer-events:none; transition: opacity 0.25s, transform 0.25s; z-index: 1000;
+  }
+  #toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+  .empty-state{ text-align:center; color: var(--ink-dim); padding: 30px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="pulse-dot off" id="pulseDot"></div>
+      <h1>مذكّر المهام</h1>
+    </div>
+    <div class="status-pill" id="notifStatus" onclick="requestNotifPermission()">تفعيل التنبيه 🔔</div>
+  </header>
+
+  <form id="taskForm">
+    <div class="row photo-row">
+      <div class="photo-picker" id="photoPicker">
+        <span id="photoPlaceholder">📷</span>
+        <img id="photoPreview" style="display:none;">
+        <input type="file" id="photoInput" accept="image/*">
+      </div>
+      <div>
+        <div class="photo-picker-label">صورة العميل</div>
+        <button type="button" class="photo-clear" id="photoClearBtn" style="display:none;" onclick="clearPhoto()">إزالة الصورة</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <input type="text" id="taskTitle" placeholder="شنو المهمة؟ مثلاً: اتصل بالعميل" required>
+    </div>
+    <div class="row">
+      <input type="text" id="clientName" placeholder="اسم العميل">
+    </div>
+    <div class="row">
+      <input type="text" id="clientPhone" placeholder="رقم الهاتف (للواتساب)" inputmode="tel" dir="ltr" style="text-align:right;">
+    </div>
+    <div class="row">
+      <input type="text" id="clientAddress" placeholder="العنوان">
+    </div>
+    <div class="row">
+      <textarea id="taskDetails" placeholder="ملاحظات إضافية"></textarea>
+    </div>
+    <div class="row time-row">
+      <label>وقت التذكير</label>
+      <select id="timeHour"></select>
+      <label>:</label>
+      <select id="timeMinute"></select>
+      <select id="timePeriod">
+        <option value="ص">ص</option>
+        <option value="م">م</option>
+      </select>
+    </div>
+    <button type="submit" class="add-btn">+ ضيف المهمة</button>
+  </form>
+
+  <div class="section-label">قائمة المهام والتذكيرات</div>
+  <div class="tasks-container" id="tasksList"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let tasks = [];
+let currentPhotoData = null;
+const STORAGE_KEY = 'task_reminder_tasks_v2';
+
+// تهيئة القوائم المنسدلة للوقت
+(function initTimeSelects(){
+  const hSelect = document.getElementById('timeHour');
+  const mSelect = document.getElementById('timeMinute');
+  for(let i=1; i<=12; i++){
+    let opt = document.createElement('option');
+    opt.value = i; opt.textContent = String(i).padStart(2, '0');
+    hSelect.appendChild(opt);
+  }
+  for(let i=0; i<60; i+=5){
+    let opt = document.createElement('option');
+    opt.value = i; opt.textContent = String(i).padStart(2, '0');
+    mSelect.appendChild(opt);
+  }
+})();
+
+// معالجة تنظيف وتحوير البيانات النصية
+function escapeHtml(str) {
+  return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ضغط وتصغير صور العملاء
+function resizeImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSize = 500;
+        let w = img.width, h = img.height;
+        if(w > h && w > maxSize){ h = h * (maxSize/w); w = maxSize; }
+        else if(h > maxSize){ w = w * (maxSize/h); h = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('photoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    currentPhotoData = await resizeImage(file);
+    document.getElementById('photoPreview').src = currentPhotoData;
+    document.getElementById('photoPreview').style.display = 'block';
+    document.getElementById('photoPlaceholder').style.display = 'none';
+    document.getElementById('photoClearBtn').style.display = 'inline';
+  }catch(err){ console.error(err); }
+});
+
+function clearPhoto(){
+  currentPhotoData = null;
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPlaceholder').style.display = 'block';
+  document.getElementById('photoClearBtn').style.display = 'none';
+}
+
+// إضافة وتخزين المهام
+document.getElementById('taskForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const title = document.getElementById('taskTitle').value.trim();
+  const clientName = document.getElementById('clientName').value.trim();
+  const clientPhone = document.getElementById('clientPhone').value.trim();
+  const clientAddress = document.getElementById('clientAddress').value.trim();
+  const details = document.getElementById('taskDetails').value.trim();
+  
+  const hour = parseInt(document.getElementById('timeHour').value);
+  const minute = parseInt(document.getElementById('timeMinute').value);
+  const period = document.getElementById('timePeriod').value;
+
+  let now = new Date();
+  let due = new Date();
+  let h24 = hour;
+  if(period === 'م' && hour < 12) h24 += 12;
+  if(period === 'ص' && hour === 12) h24 = 0;
+  
+  due.setHours(h24, minute, 0, 0);
+  if(due.getTime() <= now.getTime()){
+    due.setDate(due.getDate() + 1); // إذا كان الوقت قد مضى، يجدولها للغد
+  }
+
+  const timeStr = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')} ${period}`;
+
+  const task = {
+    id: Date.now(),
+    title, clientName, clientPhone, clientAddress, details,
+    timeStr, nextDue: due.getTime(),
+    photoData: currentPhotoData
+  };
+
+  tasks.unshift(task);
+  saveTasks();
+  renderTasks();
+  
+  // إعادة تعيين الحقول
+  document.getElementById('taskForm').reset();
+  clearPhoto();
+  showToast('✓ تمت إضافة المهمة بنجاح');
+});
+
+function saveTasks(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e){}
+}
+
+function loadTasks(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    tasks = raw ? JSON.parse(raw) : [];
+  } catch(e){ tasks = []; }
+  renderTasks();
+}
+
+function deleteTask(id){
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks(); renderTasks();
+  showToast('🗑 تم حذف المهمة');
+}
+
+function copyText(text){
+  if(!text) return;
+  navigator.clipboard.writeText(text).then(() => showToast('📋 تم النسخ'));
+}
+
+// رابط مراسلة الواتساب العراقي/الدولي
+function buildWhatsAppHref(phone, title){
+  let digits = phone.replace(/[^\d]/g, '');
+  if(digits.startsWith('0')) digits = '964' + digits.slice(1);
+  return `https://wa.me/${digits}?text=${encodeURIComponent('مرحباً، بخصوص: ' + title)}`;
+}
+
+// دالة الربط مع تقويم نظام آيفون الرسمية (Apple ICS Calendar Standard)
+function icsPad(n){ return String(n).padStart(2, '0'); }
+function icsLocalStamp(d){
+  return `${d.getFullYear()}${icsPad(d.getMonth()+1)}${icsPad(d.getDate())}T${icsPad(d.getHours())}${icsPad(d.getMinutes())}00`;
+}
+function icsUTCStamp(d){
+  return `${d.getUTCFullYear()}${icsPad(d.getUTCMonth()+1)}${icsPad(d.getUTCDate())}T${icsPad(d.getUTCHours())}${icsPad(d.getUTCMinutes())}${icsPad(d.getUTCSeconds())}Z`;
+}
+function icsEscape(s){
+  return String(s || '').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+}
+
+function addTaskToCalendar(id){
+  const t = tasks.find(x => x.id === id);
+  if(!t) return;
+  
+  const start = new Date(t.nextDue);
+  const end = new Date(start.getTime() + 30 * 60000);
+  
+  const notes = [];
+  if(t.clientName) notes.push(`العميل: ${t.clientName}`);
+  if(t.clientPhone) notes.push(`الهاتف: ${t.clientPhone}`);
+  if(t.clientAddress) notes.push(`العنوان: ${t.clientAddress}`);
+  if(t.details) notes.push(`ملاحظات: ${t.details}`);
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//مذكر المهام//AR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${t.id}@mudhakkir`,
+    `DTSTAMP:${icsUTCStamp(new Date())}`,
+    `DTSTART:${icsLocalStamp(start)}`,
+    `DTEND:${icsLocalStamp(end)}`,
+    `SUMMARY:${icsEscape(t.title)}`,
+    notes.length ? `DESCRIPTION:${icsEscape(notes.join('\\n'))}` : '',
+    'BEGIN:VALARM',
+    'ACTION:AUDIO',
+    'TRIGGER;VALUE=DATE-TIME:' + icsLocalStamp(start),
+    'END:VALARM',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${icsEscape(t.title)}`,
+    'TRIGGER:PT0M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].filter(Boolean).join('\r\n');
+
+  const a = document.createElement('a');
+  a.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// عرض القائمة وتنسيق التذاكر
+function renderTaskRow(t, now){
+  const remaining = t.nextDue - now;
+  const isDue = remaining <= 0;
+
+  const waBtn = t.clientPhone 
+    ? `<a href="${buildWhatsAppHref(t.clientPhone, t.title)}" target="_blank" class="task-contact">💬 مراسلة واتساب</a>`
+    : '<span></span>';
+
+  const detailsLine = t.details
+    ? `<div class="ticket-info-pill">📝 <span>${escapeHtml(t.details)}</span><button type="button" class="copy-btn" onclick="copyText('${escapeHtml(t.details)}')">📋</button></div>`
+    : '';
+
+  const clientLine = t.clientName
+    ? `<div class="ticket-info-pill">👤 <span>العميل: ${escapeHtml(t.clientName)}</span><button type="button" class="copy-btn" onclick="copyText('${escapeHtml(t.clientName)}')">📋</button></div>`
+    : '';
+
+  const statusHtml = isDue
+    ? `<span class="ticket-status due">🔴 حان وقتها</span>`
+    : `<span class="ticket-status ok">🟢 موعد متوقع</span>`;
+
+  const d = new Date(t.nextDue);
+  const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+
+  return `
+    <div class="ct-row ${isDue ? 'due' : ''}">
+      <div class="ticket-head">
+        <span class="ticket-flight-pill">📌 TASK-#${t.id.toString().slice(-4)}</span>
+        ${statusHtml}
+      </div>
+      <div class="ticket-main">
+        <div class="ticket-title">${escapeHtml(t.title)}</div>
+        <div class="ticket-time-circle">${t.timeStr}</div>
+      </div>
+      <div class="ticket-date-pill">📅 ${dateStr}</div>
+      ${clientLine}
+      ${detailsLine}
+      <div class="ticket-footer">
+        ${waBtn}
+        <div class="ct-actions">
+          <button type="button" class="icon-btn del" onclick="deleteTask(${t.id})" title="حذف">🗑</button>
+        </div>
+      </div>
+      <button type="button" class="calendar-btn" onclick="addTaskToCalendar(${t.id})">📅 إضافة للتقويم الرسمي (للتنبيه والصوت)</button>
+    </div>
+  `;
+}
+
+function renderTasks(){
+  const container = document.getElementById('tasksList');
+  if(!tasks.length){
+    container.innerHTML = '<div class="empty-state">لا توجد مهام حالياً.. أضف مهمتك الأولى أعلاه!</div>';
+    return;
+  }
+  const now = Date.now();
+  container.innerHTML = tasks.map(t => renderTaskRow(t, now)).join('');
+}
+
+function requestNotifPermission(){
+  if('Notification' in window){
+    Notification.requestPermission().then(updateNotifStatusUI);
+  }
+}
+
+function updateNotifStatusUI(){
+  const el = document.getElementById('notifStatus');
+  const dot = document.getElementById('pulseDot');
+  if('Notification' in window && Notification.permission === 'granted'){
+    el.textContent = 'التنبيه مفعّل ✓';
+    el.className = 'status-pill granted';
+    dot.classList.remove('off');
+  }
+}
+
+// التشغيل الأولي عند تحميل الصفحة
+updateNotifStatusUI();
+loadTasks();
+</script>
+</body>
+</html>
